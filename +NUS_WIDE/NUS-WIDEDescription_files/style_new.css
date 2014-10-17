@@ -1,0 +1,86 @@
+body {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-family: Arial, Helvetica, sans-serif;
+	padding-bottom: 15px;
+	font-size: 12px;
+	background: #cccccc;
+	text-align: center;
+}
+
+
+h1 {font-weight: normal; color: #3366CC; margin: 0px; padding: 0px; margin-bottom: 5px; border-bottom:1px solid #000000}
+h2 {font-weight: normal; color: #3366CC; margin: 0px; padding: 0px; }
+h3 {font-weight: normal; color: #3366CC; margin: 0px; padding: 0px; }
+
+
+a {text-decoration: none; color: #CC6600}
+a:hover {text-decoration: underline;}
+
+#container	{
+	background: #ffffff;
+	width: 650px;
+	margin: 0px auto;
+	margin-top: 20px;
+	margin-bottom: 20px;
+	padding: 20px;
+	text-align: left;
+	border: 1px solid #000000;
+}
+
+.dataBox	{
+	margin-bottom: 20px;
+	border: 1px solid #000; 
+	padding: 15px; 
+	font-family: sans serif; 
+	background: #eeeeee;
+}
+
+.dataBox h3	{
+	padding: 0px; 
+	margin: 0px; 
+	color: #3366CC;
+	font-weight: normal;
+}
+
+
+.section{
+	padding: 0px;
+	margin-bottom: 30px;
+
+}
+
+.concept{
+	padding: 0px;
+	margin-bottom: 20px;
+
+}
+
+.concept h2	{
+	padding: 0px;
+	margin: 0px;
+}
+
+.concept p {
+	padding: 0px;
+	margin: 0px;
+}
+
+.footer{
+	margin: 0px;
+	padding: 0px;
+	margin-top: 30px;
+	border-top: 1px solid #000000;
+}
+
+.footer p{
+	padding: 0px;
+	border: 0px;
+	margin: 0px;
+	font-size: 10px;
+}
+
+ol {
+	padding-left: 15px;
+}

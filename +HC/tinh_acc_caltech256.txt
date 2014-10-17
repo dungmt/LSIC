@@ -1,0 +1,5 @@
+ scores_matrix_new = scores_matrix(1:256,1:5120);
+ label_vector_new = label_vector(1:5120);
+ [est_label est_label] = max(scores_matrix_new, [], 1);
+ [C,order] = confusionmat(label_vector_new,est_label);
+ sum(diag(C))/length(label_vector_new)

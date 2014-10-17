@@ -1,0 +1,30 @@
+For Caltech256, the instances of each concept are split to train/val/test by 50%-25%-25%.
+
+Dataset HC SIB-HC ER-HC
+Caltech256
+Acc (%) 26.7 27.0 30.5
+MTC (%) 91.5 91.1 67.1
+ILSRVC1K
+Acc (%) 9.4 9.6 11.2
+MTC (%) 98.1 98.3 88.7
+
+For each node ci, a classifier fci (x) is learnt using linear SVM [7] on training set. 
+In addition, a multi-class logistic regression model is learnt for each internal node on the validation set.
+The testing instances are all from leaf nodes which are contextually exclusive.
+
+Em gởi Thầy các bước em thực hiện
+1. Vì taxonomy của tập Caltech256 được cung cấp dạng ảnh nên em nhập bằng tay dưới dạng file xml.
+2. Mô tả ảnh:
+    Feature vector kích thước 32.000 ( dùng LLC trên SIFT feature, pyramid 1x1, 2x2 và 3x1, Codebook: 4000)
+3. Mỗi lớp được chia thành 3 tập train/val/test theo tỉ lệ 30:30:20.
+ - Đây là tỉ lệ thực nghiệm em đã làm theo phương pháp phân rã ma trận. Nhưng trong phân lớp phân cấp mà em đang cài đặt thì không cần tập validation.
+ - Tỉ lệ trong bài MM'13 tác giả chọn là 50%-25%-25%.
+4. Bộ phân lớp tại các node
+Mỗi node trong cây có 1 bộ phân lớp. Em đọc phần thực nghiệm của bài MM'13 thì không thấy
+- Do node lá là các node có nhãn tương ứng với các class. Vì thế không cần bộ phân lớp cho node lá.
+- Các node còn lại trong cây có một bộ phân lớp multiclass: 
+ + dùng thư viện liblinear
+ + training samples được lấy từ tất cả các tập training data của các class thuộc con của nó.
+ 
+ 5. Đánh giá độ chính xác
+ Dựa trên độ chính xác phân lớp để đánh giá hiệu quả của phương pháp.
