@@ -13,7 +13,7 @@ function [ conf ] = SetupIMDB( conf )
         % conf.IMDB.num_images_train  = 100; 
         conf.IMDB.num_images_train  = 100;
         conf.IMDB.num_images_test   = 150;     
-        conf.IMDB.num_images_val    = 50;
+        conf.IMDB.num_images_val    = 30;
         
         conf.IMDB.num_images_test_per_chunk_file   = 1000;  
         conf.IMDB.num_images_val_per_chunk_file    = 1000;
@@ -22,11 +22,15 @@ function [ conf ] = SetupIMDB( conf )
         conf.IMDB.num_images_train  = 75/100;        
         conf.IMDB.num_images_val    = 25/100;     
         conf.IMDB.num_images_test   = 100/100;     
-    elseif strcmp(conf.datasetName ,'Caltech256') || strcmp(conf.datasetName ,'SUN397')
+    elseif strcmp(conf.datasetName ,'Caltech256') 
+        conf.IMDB.num_images_train  = 40; 
+        conf.IMDB.num_images_test   = 20;     
+        conf.IMDB.num_images_val    = 20;       
+    elseif strcmp(conf.datasetName ,'SUN397')
         conf.IMDB.num_images_train  = 50/100; 
         conf.IMDB.num_images_test   = 25/100;     
         conf.IMDB.num_images_val    = 25/100;       
-    end
+    end    
     
     num_images_train = conf.IMDB.num_images_train; 
     num_images_test  = conf.IMDB.num_images_test;

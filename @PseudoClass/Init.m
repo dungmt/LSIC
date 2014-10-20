@@ -10,13 +10,14 @@ function conf  = Init(obj,conf)
 %             obj.model = [];
 
 	if strcmp( conf.datasetName,'ILSVRC65')         
-        obj.scaleValue = 1000;  % Vi gia tri SVDs nho
+        obj.scaleValue = 3000;  % Vi gia tri SVDs nho
         obj.cValue = 1;
     elseif strcmp( conf.datasetName,'ILSVRC2010')         
-        obj.scaleValue = 3000;  % Vi gia tri SVDs nho
-        obj.cValue = 20;
+        obj.scaleValue = 1000;  % Vi gia tri SVDs nho
+        obj.cValue = 1;
     elseif strcmp( conf.datasetName,'Caltech256') || strcmp( conf.datasetName,'SUN397')
         obj.scaleValue = conf.class.Num;
+       % obj.scaleValue = 1000;
         obj.cValue = 1;
     end
     

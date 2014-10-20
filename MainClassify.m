@@ -2,7 +2,7 @@
 % NII
 % Updated 2014-Oct-17
 
-function MainClassify( dataset,start_Idx,end_Idx, step,optionR,approach)
+function MainClassify( dataset,start_Idx,end_Idx, step,optionR,approach,isAdd1, OptEigs)
 
     [ conf ] = EigenClassifier.ExtractFeaturesAndSetupTrainTestValDataset( dataset, start_Idx,end_Idx, step);
 
@@ -22,7 +22,7 @@ function MainClassify( dataset,start_Idx,end_Idx, step,optionR,approach)
     conf  = EigenClassifier.InitDecompose( conf,L_EigenClass, idx_alg );
 %     optionR=0;
 %     approach=321;
-   conf = EigenClassifier.EigenClassifier(conf, optionR, approach);
-
+%   conf = EigenClassifier.EigenClassifier(conf, start_Idx,end_Idx, step,optionR,approach);
+    conf = EigenClassifier.EigenClassifier_new(conf, start_Idx,end_Idx, step,optionR,approach, isAdd1, OptEigs);
 
 end

@@ -10,7 +10,7 @@ function conf  = Train(obj,conf,ci_start,ci_end)
     ScaleValue      = obj.scaleValue;
     C_Value         = obj.cValue;
     fprintf('\n\t Scale value: %d', ScaleValue);
-    fprintf('\n\t c value: %f', C_Value);
+%     fprintf('\n\t c value: %f', C_Value);
   %  fprintf('\n\t Number of pseudo classes: %d', num_pseudoClass);
    % kerneltype = 'precomputed kernel'; %obj.kerneltype;
    % svmtype = obj.svmtype;
@@ -48,7 +48,8 @@ function conf  = Train(obj,conf,ci_start,ci_end)
     switch solvertype
         %---------------------------------------%
         case 'liblinear'             
-            libsvm_options = ['-s 11 -c ',str_C_Value];  
+            %libsvm_options = ['-s 11 -c ',str_C_Value];  
+            libsvm_options = ['-s 11']; 
 %           path_filename_instance_matrix = conf.val.path_filename;
             isPreComp = false;            
             path_filename_instance_matrix   = conf.val.path_filename;
@@ -67,9 +68,8 @@ function conf  = Train(obj,conf,ci_start,ci_end)
     path_filename_svr_ready = conf.experiment.path_filename_svr_ready;
     if ~ exist(path_filename_svr_ready,'file') || conf.isOverWriteSVRTrain==true        
         classifier.SVR_Train(conf,solvertype,path_filename_instance_matrix, libsvm_options,isPreComp,ScaleValue, conf.pseudoclas.arr_Step,ci_start,ci_end);
-        fprintf(' finished !');
-        ready=1;
-        save(path_filename_svr_ready,'ready');
+        fprintf(' finished !');        
+       
     else 
         fprintf(' finished (ready)!');
     end

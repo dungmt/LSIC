@@ -31,7 +31,7 @@ function [ conf ] = OVAClassify( conf , start_Idx,end_Idx, step)
    conf.isOverWriteResult = false;
    [ conf ] = EigenClassifier.TrainOneVsAll( conf , start_Idx,end_Idx, step);
    [ conf ] = EigenClassifier.TestOneVsAll( conf , start_Idx,end_Idx, step);
-   conf.isOverWriteResult = true;
+%        conf.isOverWriteResult = true;
     [ conf ] = EigenClassifier.ValOneVsAll( conf , start_Idx,end_Idx, step);
    [ conf ] = CombineResultTest_All( conf);
     Evaluate_All(conf);
