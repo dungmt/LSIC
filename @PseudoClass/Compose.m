@@ -62,7 +62,7 @@ function [ conf ] = Compose(obj, conf )
         end			
    end
     
-   if exist(conf.svr.path_filename_compose_ready, 'file')
+   if exist(conf.svr.path_filename_compose_ready, 'file') && conf.isOverWriteResult==false
        fprintf(' done (ready) !');
        return;
    end

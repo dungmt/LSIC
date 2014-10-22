@@ -83,7 +83,7 @@ function [conf] = InitRPQ(conf, optionR, approach,isAdd1, OptEigs)
 
     KernelType = 'linear';
     if(approach==33)
-        KernelType = 'kinters'; %'kl1'; %'kjs'; %'kchi2';        
+        KernelType ='kl2'; %'kl1'; %'kjs'; % 'khell'; %'kinters'; %  'kchi2';% 
     end
     conf.experiment.RPQ.kernel = KernelType;
     opt=2;
@@ -375,8 +375,8 @@ function conf = TwoStepApproach(conf,start_Idx,end_Idx, step)
     ci_end = end_Idx;
     
    % Thuc hien training
-      conf  = pseudoClass.Train(conf,ci_start,ci_end);
-     % Thuc hien testing     
+    conf  = pseudoClass.Train(conf,ci_start,ci_end);
+%      Thuc hien testing     
      conf  = pseudoClass.Test(conf,ci_start,ci_end);   
         % Ket hop ket qua lai  
      conf.isOverWriteResult= false;
@@ -526,18 +526,24 @@ end
 function conf = JointOptimizationApproach(conf)
        fprintf('\nJoint Optimization Approach...');
        [conf] = CalculatingEigs(conf);
+       
+    %% ------------------------------------------------------------------            
+       fprintf('\n\t Loading S testing feature vectors from %s  ....', conf.experiment.RPQ.path_filename_testing_feature);
+       load (conf.experiment.RPQ.path_filename_testing_feature);
+       fprintf('done');
+       
+       ST_test = test_instance_matrix';
+       clear test_instance_matrix;
+       
        fprintf('\n\t Loading %s....',conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach);          
        load(conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach);
        fprintf('done');
         
-    %% ------------------------------------------------------------------
+    
        fprintf('\n\t Loading S training feature vectors from %s  ....', conf.experiment.RPQ.path_filename_training_feature);
        load (conf.experiment.RPQ.path_filename_training_feature);
        fprintf('done');
-                
-       fprintf('\n\t Loading S testing feature vectors from %s  ....', conf.experiment.RPQ.path_filename_testing_feature);
-       load (conf.experiment.RPQ.path_filename_testing_feature);
-       fprintf('done');
+       
         
        fprintf('\n\t Loading R matrix from %s....',conf.experiment.RPQ.path_filename_PPk);
        load(conf.experiment.RPQ.path_filename_R,'R');
@@ -554,7 +560,8 @@ function conf = JointOptimizationApproach(conf)
         arr_Step =conf.pseudoclas.arr_Step;        
         num_Arr_Step = length(arr_Step);         
         
-        ST_test = test_instance_matrix';
+       
+        
         for i=1: num_Arr_Step 
             l = arr_Step(i);        
 
@@ -880,51 +887,54 @@ function [conf]  = CaculatingKernel(conf)
    kernel = conf.experiment.RPQ.kernel;
    fprintf('\n Calculating kernel space: %s....',kernel);
     
-   if ~exist(conf.val.path_filename_kernel, 'file')
-        fprintf('\n\t Loading instance_matrix S from %s ....',conf.val.path_filename);
-        load (conf.val.path_filename);
-        fprintf('\n\t Calculating vl_homkermap(%s) on training.....',kernel);
-        instance_matrix_kernel = vl_homkermap(instance_matrix, 1, kernel); % , 'gamma', .5) ;
-        fprintf('done');     
-
-        fprintf('\n\t Saving kernel instance_matrix into %s ....',conf.val.path_filename_kernel);
-        save(conf.val.path_filename_kernel,'instance_matrix_kernel','-v7.3');
-        fprintf('done');
-        val.instance_matrix_kernel = instance_matrix_kernel;
-        clear instance_matrix_kernel;
-    else
-        fprintf('\n\t Loading instance_matrix_kernel from %s ....',conf.val.path_filename_kernel);
-        val = load (conf.val.path_filename_kernel);
-        fprintf('done');
-        
-    end
-    % ---------------------------------------------------------------------
-    
-    if ~exist(conf.test.path_filename_kernel, 'file')
-        fprintf('\n\t Loading instance_matrix from %s ....',conf.test.path_filename);
-        load (conf.test.path_filename);
-        fprintf('\n\t Calculating vl_homkermap(%s) on test.....',kernel);
-        instance_matrix_kernel = vl_homkermap(instance_matrix, 1, kernel); % , 'gamma', .5) ;
-        fprintf('done');     
-
-        fprintf('\n\t Saving kernel instance_matrix into %s ....',conf.test.path_filename_kernel);
-        save(conf.test.path_filename_kernel,'instance_matrix_kernel','-v7.3');
-        fprintf('done');
-        test.instance_matrix_kernel = instance_matrix_kernel;
-        clear instance_matrix_kernel;
-    else
-        fprintf('\n\t Loading instance_matrix_kernel from %s ....',conf.test.path_filename_kernel);
-        test = load (conf.test.path_filename_kernel);
-        fprintf('done');
-        
-    end
-    
+%    if ~exist(conf.val.path_filename_kernel, 'file')
+%         fprintf('\n\t Loading instance_matrix S from %s ....',conf.val.path_filename);
+%         load (conf.val.path_filename);
+%         fprintf('\n\t Calculating vl_homkermap(%s) on training.....',kernel);
+%         instance_matrix_kernel = vl_homkermap(instance_matrix, 1, kernel); % , 'gamma', .5) ;
+%         fprintf('done');     
+% 
+%         fprintf('\n\t Saving kernel instance_matrix into %s ....',conf.val.path_filename_kernel);
+%         save(conf.val.path_filename_kernel,'instance_matrix_kernel','-v7.3');
+%         fprintf('done');
+%         val.instance_matrix_kernel = instance_matrix_kernel;
+%         clear instance_matrix_kernel;
+%     else
+%         fprintf('\n\t Loading instance_matrix_kernel from %s ....',conf.val.path_filename_kernel);
+%         val = load (conf.val.path_filename_kernel);
+%         fprintf('done');
+%         
+%     end
+%     % ---------------------------------------------------------------------
+%     
+%     if ~exist(conf.test.path_filename_kernel, 'file')
+%         fprintf('\n\t Loading instance_matrix from %s ....',conf.test.path_filename);
+%         load (conf.test.path_filename);
+%         fprintf('\n\t Calculating vl_homkermap(%s) on test.....',kernel);
+%         instance_matrix_kernel = vl_homkermap(instance_matrix, 1, kernel); % , 'gamma', .5) ;
+%         fprintf('done');     
+% 
+%         fprintf('\n\t Saving kernel instance_matrix into %s ....',conf.test.path_filename_kernel);
+%         save(conf.test.path_filename_kernel,'instance_matrix_kernel','-v7.3');
+%         fprintf('done');
+%         test.instance_matrix_kernel = instance_matrix_kernel;
+%         clear instance_matrix_kernel;
+%     else
+%         fprintf('\n\t Loading instance_matrix_kernel from %s ....',conf.test.path_filename_kernel);
+%         test = load (conf.test.path_filename_kernel);
+%         fprintf('done');
+%         
+%     end
+%     
  
+    val = load (conf.val.path_filename);
+    test = load (conf.test.path_filename);
     if ~exist(conf.val.path_filename_kernel_valval,'file')
         fprintf('\n\t Calculating vl_alldist(train,train,%s).....',kernel);
         tic
+        K = vl_alldist(val.instance_matrix,val.instance_matrix, kernel) ; 
        % K = vl_alldist(val.instance_matrix_kernel,val.instance_matrix_kernel, kernel) ;        % compute the Chi2 kernel
-        K = val.instance_matrix_kernel' * val.instance_matrix_kernel;
+       % K = val.instance_matrix_kernel' * val.instance_matrix_kernel;
         toc
         fprintf('done');
         
@@ -936,12 +946,12 @@ function [conf]  = CaculatingKernel(conf)
     
     
     if ~exist(conf.test.path_filename_kernel_testval,'file')
-        fprintf('\n\t Calculating vl_alldist(train,train,%s).....',kernel);
-        tic
+
         fprintf('\n\t Calculating vl_alldist(test,train,%s).....',kernel);
         tic
-       % K_test = vl_alldist(test.instance_matrix_kernel,val.instance_matrix_kernel, kernel) ;        % compute the Chi2 kernel
-        K_test = test.instance_matrix_kernel' * val.instance_matrix_kernel;  
+         K_test = vl_alldist(test.instance_matrix,val.instance_matrix, kernel) ;    
+       % K_test = vl_alldist(test.instance_matrix_kernel,val.instance_matrix_kernel, kernel) ;       
+       % K_test = test.instance_matrix_kernel' * val.instance_matrix_kernel;  
         toc
         fprintf('done');
         

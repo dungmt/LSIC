@@ -32,7 +32,7 @@ function Decomposing(conf)
 %         fprintf('\n\t\t Acc = %f', Acc);
 %         fprintf('\n\t\t M_VL_AP = %f', M_VL_AP);
 %     
-    
+%     
     num_classes = size(scores_matrix,1)
     num_images  = size(scores_matrix,2)
 

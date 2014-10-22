@@ -128,6 +128,7 @@ function SVR_Train(conf,solvertype, path_filename_instance_matrix,libsvm_options
   %  for ci=1:num_pseudo_classes     
         
         training_label_vector = V(:,ci)*scaleValue;   
+     %   training_label_vector = V(:,ci)*1000;
        %%xx training_label_vector = VGT(:,ci)*scaleValue;   
         %%training_label_vector = VV(:,ci)*scaleValue;  
        % num_Samples = length(training_label_vector);        
@@ -162,6 +163,21 @@ function SVR_Train(conf,solvertype, path_filename_instance_matrix,libsvm_options
         end 
     end
     fprintf('\nDONE!\n');
+    ready=1;
+     for ci=1:num_pseudo_classes
+  
+        str_num_ci = num2str(ci,'%.3d');
+        filename_model_ci = [prefix_file_model,str_num_ci,suffix_file_model];   
+        path_filename_model_ci = fullfile(pathToRegressionTrains,filename_model_ci);
+
+        if ~exist( path_filename_model_ci, 'file') 
+            ready=0;
+            break;
+        end 
+     end
+     if ready==1
+        save(conf.experiment.path_filename_svr_ready,'ready');
+     end
     
 end
 function SaveModel(path_filename_model_ci, model)

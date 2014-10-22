@@ -169,7 +169,7 @@ function SVR_Test(conf,solvertype, isPreComp,ci_start,ci_end)
                             tic
                             [predicted_label, accuracy, decision_values] = predict(test_label_vector,instance_matrix, model);  
                             toc;
-                            pause;
+%                             pause;
                     otherwise
                          error('SVR_Test:otherwise: %s--> Chua cai dat', solvertype);
                 end

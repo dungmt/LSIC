@@ -42,9 +42,26 @@ function SVR_Test_IL(conf,ci_start,ci_end)
         suffix_file_model = conf.svr.suffix_file_model;
         
         ci_endd = min(ci_end,num_pseudo_classes);
-        start =1;                       
-        tic
+        % Load tat cac modedel 
         
+        for ci=ci_start:ci_endd
+            str_num_ci = num2str(ci,'%.3d');          
+            filename_model{ci} = [prefix_file_model, str_num_ci, suffix_file_model];
+            path_filename_model_ci = fullfile(pathToRegressionTrains,filename_model{ci});
+
+            if ~exist( path_filename_model_ci, 'file')
+                 error('\n\t Model file %s is not found !',path_filename_model_ci);
+            end        
+
+            fprintf('\n\t\t Loading model from file %s ...',path_filename_model_ci);
+            load (path_filename_model_ci); %,'model','-v7.3');
+            allmodel{ci} = model;
+        end
+        
+        %% --------------------------------------------------------------
+        
+        start =1;                       
+        tic        
         for j=1:num_FileTest  
             % Load file test
             str_id = num2str(j,'%.4d');
@@ -68,16 +85,17 @@ function SVR_Test_IL(conf,ci_start,ci_end)
             for ci=ci_start:ci_endd
             %for ci=1:0
 
-                str_num_ci = num2str(ci,'%.3d');          
-                filename_model_ci = [prefix_file_model, str_num_ci, suffix_file_model];
-                path_filename_model_ci = fullfile(pathToRegressionTrains,filename_model_ci);
-
-                if ~exist( path_filename_model_ci, 'file')
-                    error('\n\t Model file %s is not found !',path_filename_model_ci);
-                end        
-
-                fprintf('\n\t\t Loading model from file %s ...',path_filename_model_ci);
-                load (path_filename_model_ci); %,'model','-v7.3');
+                str_num_ci = num2str(ci,'%.3d');  
+                filename_model_ci = filename_model{ci};
+%                 filename_model_ci = [prefix_file_model, str_num_ci, suffix_file_model];
+%                 path_filename_model_ci = fullfile(pathToRegressionTrains,filename_model_ci);
+% 
+%                 if ~exist( path_filename_model_ci, 'file')
+%                     error('\n\t Model file %s is not found !',path_filename_model_ci);
+%                 end        
+% 
+%                 fprintf('\n\t\t Loading model from file %s ...',path_filename_model_ci);
+%                 load (path_filename_model_ci); %,'model','-v7.3');
 
                 filename_kq = [filename_model_ci, '.test.', str_id, '.mat'];
                 path_filename_kq =fullfile(pathToRegressionTrainsTest,filename_kq);
@@ -86,7 +104,8 @@ function SVR_Test_IL(conf,ci_start,ci_end)
                 if ~exist(path_filename_kq, 'file') || conf.isOverWriteSVRTest==true
 %                     tic
                     fprintf('\n\t Testing pseudo class: %d  and test file: test.%s ..\n',ci,str_id);                                
-                    [predicted_label, accuracy, decision_values]= predict(test_label_vector, instance_matrix, model);    
+                   % [predicted_label, accuracy, decision_values]= predict(test_label_vector, instance_matrix, model);    
+                    [predicted_label, accuracy, decision_values]= predict(test_label_vector, instance_matrix, allmodel{ci});    
                     save(path_filename_kq,'predicted_label', 'accuracy', 'decision_values','-v7.3');
 %                     toc
                 else

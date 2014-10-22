@@ -1,4 +1,4 @@
-function conf = EigenClassifier(conf, optionR, approach)
+function conf = EigenClassifier(conf, start_Idx,end_Idx, step,optionR,approach)
 % EigenClassifier
 % switch of optionR 
 %   0: R = response matrix
@@ -10,8 +10,10 @@ function conf = EigenClassifier(conf, optionR, approach)
 %   31: Two step approach
 %   32: Joint optimization
 %   321: Joint optimization with High dimension feature vectors
+%   322: Joint optimization with old V
 %   33: Kernel extension
 %   34: Formulation as classification problem
+
 
 
    fprintf('\n -----------------------------------------------');
@@ -47,19 +49,22 @@ function conf = EigenClassifier(conf, optionR, approach)
    end  
    
    conf = CaculatingR(conf, optionR);
-   conf = ComputingPQPkQk(conf);
-   
+   if approach ~=31
+    conf = ComputingPQPkQk(conf);
+   end
    
    %% ---------------------------------------------------------------------
    if approach==31
-        conf = TwoStepApproach(conf);
+        conf = TwoStepApproach(conf,start_Idx,end_Idx, step);
    elseif approach==32
         conf = JointOptimizationApproach(conf);        
  %% ---------------------------------------------------------------------
     elseif approach==321 % Joint optimization with High dimension feature vectors
         conf = JointOptimizationWithHighDimensionApproach(conf);
+   elseif approach==322
+        conf = JointOptimizationApproachOldV(conf);    
    elseif approach==33
-       conf = KernelExtensionApproach(conf)
+       conf = KernelExtensionApproach(conf);
    elseif approach==34
        conf = FormulationAsClassificationProblemApproach(conf);
    end
@@ -68,7 +73,7 @@ function [conf] = InitRPQ(conf, optionR, approach)
 
     KernelType = 'linear';
     if(approach==33)
-        KernelType = 'kchi2';
+        KernelType = 'kinters'; %'kl1'; %'kjs'; %'kchi2';        
     end
     conf.experiment.RPQ.kernel = KernelType;
     opt=2;
@@ -111,11 +116,26 @@ function [conf] = ComputingPQPkQk(conf)
                 load (conf.val.path_filename);
                 fprintf('done');
                 S = instance_matrix;
+                size(S)
+                pause
+                nrow = size(S,1);                
+                S(nrow+1,:)=1;                
+                size(S)
+                pause
             else
-                fprintf('\n\t Loading instance_matrix_kernel S from %s ....',conf.val.path_filename_kernel);
-                load (conf.val.path_filename_kernel);
+                if ~exist (conf.val.path_filename_kernel_valval,'file')
+                    [conf]  = CaculatingKernel(conf);
+                end
+                fprintf('\n\t Loading instance_matrix_kernel S from %s ....',conf.val.path_filename_kernel_valval);
+                load (conf.val.path_filename_kernel_valval);
                 fprintf('done');
-                S = instance_matrix_kernel;
+                S = K;
+                size(S)                
+                pause
+                nrow = size(S,1);                
+                S(nrow+1,:)=1;                
+                size(S)
+                pause
             end
             %%-------------------------------------------------------------
         
@@ -146,7 +166,7 @@ function [conf] = ComputingPQPkQk(conf)
                 Pk(i,i)=Pk(i,i)+k;
             end
             %%-------------------------------------------------------------     
-            fprintf('\n computes Qk matrix ....');
+            fprintf('\n\t computes Qk matrix ....');
             %Tinh cong duong cheo
             Qk = Q;
             n=size(Q,1);
@@ -166,7 +186,7 @@ function [conf] = ComputingPQPkQk(conf)
     end
 end
 %   31: Two step approach
-function conf = TwoStepApproach(conf)
+function conf = TwoStepApproach(conf,start_Idx,end_Idx, step)
     fprintf('\n Two step approach');
     % Thuc hien Decomposing score_matrix
     conf.isOverWriteResult = false;
@@ -183,9 +203,9 @@ function conf = TwoStepApproach(conf)
     conf.isOverWriteSVRTrain=false   ;
     conf.isOverWriteSVRTest=false   ;
   
-    ci_start=1;
-    ci_end = conf.class.Num;
-    step=1;
+    ci_start=start_Idx;
+    ci_end = end_Idx;
+    
    % Thuc hien training
       conf  = pseudoClass.Train(conf,ci_start,ci_end);
      % Thuc hien testing     
@@ -196,7 +216,7 @@ function conf = TwoStepApproach(conf)
      EigenClassifier.CombineEvaluate_All(conf)  ;
 end
 %   32: Joint optimization
-function conf = JointOptimizationApproach(conf)
+function conf = JointOptimizationApproachOldV(conf)
 %     fprintf('\n approach=%d ....',approach);
         % --------------------------------------------------------        
         %         fprintf('\n\t computes Q-P matrix ....');
@@ -249,18 +269,24 @@ function conf = JointOptimizationApproach(conf)
                 test = load (conf.test.path_filename);
                 fprintf('done');
                 test_instance_matrix = test.instance_matrix;
+                test_label_vector = test.label_vector;
                 clear  test.instance_matrix;
         else
-                fprintf('\n\t Loading instance_matrix_kernel S from %s ....',conf.val.path_filename_kernel);
-                load (conf.val.path_filename_kernel);
+                fprintf('\n\t Loading instance_matrix_kernel S from %s ....',conf.val.path_filename_kernel_valval);
+                load (conf.val.path_filename_kernel_valval);
                 fprintf('done');
-                S = instance_matrix_kernel;
+                S = K;
+                clear K;
                 
-                fprintf('\n\t Loading testing data from %s ....',conf.test.path_filename_kernel);
-                test = load (conf.test.path_filename_kernel);
+                fprintf('\n\t Loading testing data from %s ....',conf.test.path_filename_kernel_testval);
+                load (conf.test.path_filename_kernel_testval);
                 fprintf('done');
-                test_instance_matrix = test.instance_matrix_kernel;
-                clear  test.instance_matrix_kernel;                
+                test_instance_matrix = K_test';
+                clear  K_test;               
+                fprintf('\n\t Loading testing data from %s ....',conf.test.path_filename);
+                test = load (conf.test.path_filename,'label_vector');
+                fprintf('done');               
+                test_label_vector = test.label_vector;
                 
         end
             
@@ -269,8 +295,16 @@ function conf = JointOptimizationApproach(conf)
         fprintf('\n\t Loading R matrix from %s....',conf.experiment.RPQ.path_filename_RPQPkQk);
         load(conf.experiment.RPQ.path_filename_R,'R');
         fprintf(' done !');
+    
+         
+        fprintf('\n\t Loading score matrix from %s....',conf.val.path_filename_score_matrix);
+        M = load(conf.val.path_filename_score_matrix);
+        fprintf(' done !');
         
-
+        fprintf('\n\t\t Finding singular values and vectors by svds function with kk=%d...',conf.class.Num);
+		[~,S_old,V_old] = svds(M.scores_matrix,conf.class.Num);
+        fprintf(' done !');
+        VT_old = V_old';
         
         %% ----------------------------------------------------------------             
         fprintf('\n Testing ...');
@@ -293,9 +327,11 @@ function conf = JointOptimizationApproach(conf)
             % Obtain U = ~ ST ~W .
             U=S'*W;           
             % Obtain V = ((U SS)+R )T .
-            SS=sqrt(Lambda);   
-            pinvUS=pinv(U*SS);              
-            V=pinvUS*R;   
+%              SS=sqrt(Lambda);   
+%             pinvUS=pinv(U*SS);              
+%             V=pinvUS*R;   
+            SS = S_old(1:l,1:l);
+            V = VT_old(1:l,:);
             
             % Algorithm: classification
             % Calculate estimated response by Rtest = ~ STtest~WSS V T .
@@ -318,6 +354,160 @@ function conf = JointOptimizationApproach(conf)
         fprintf('\n\t Results:\n');
         arr_Acc
         arr_AP
+end
+function conf = JointOptimizationApproach(conf)
+%     fprintf('\n approach=%d ....',approach);
+        % --------------------------------------------------------        
+        %         fprintf('\n\t computes Q-P matrix ....');
+        %         QP = Q\P;
+        %         QP = QP + k*eye(size(QP,1));
+        %         [VV,DD] = eigs(QP,[],L);
+        % --------------------------------------------------------        
+        %         fprintf('\n\t omputes eigs(P,Q,L) ....');
+        %         tic
+        %         [VV,DD] = eigs(P,Q,L);
+        %         toc
+        % --------------------------------------------------------       
+        % Algorithm: training
+        % Solve generalized eigenvalue problem
+       
+        if ~exist(conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach,'file')
+            fprintf('\n Loading filename: %s ....',conf.experiment.RPQ.path_filename_RPQPkQk);
+            load(conf.experiment.RPQ.path_filename_RPQPkQk);
+            fprintf('done');
+            
+            L=conf.class.Num;
+            fprintf('\n\t computes Qk_iPk = Qk\Pk....');
+            
+            Qk_iPk = Qk\Pk; % Qk^(-1) * Pk
+%             Qk_1Pk = Qk' *  Pk;
+            fprintf('\n\t computes eigs(Qk_iPk,L=%d) ....',L);       
+            tic
+            [VVk,DDk] = eigs(Qk_iPk,L);
+%             size(VVk)
+%             size(DDk)
+%             fprintf('\n\t computes eigs(Pk,Qk,L=%d) ....',L);       
+%             tic
+%              [VVk,DDk] = eigs(Pk,Qk,L);
+%           [VVk,DDk] = eigs(P,Q,L); % 7/27/2014
+            toc
+            fprintf('\n\t Saving filename %s....',conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach);           
+            save(conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach,'VVk','DDk','-v7.3');
+            fprintf('done');
+        else
+           fprintf('\n\t Loading %s....',conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach);          
+           load(conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach);
+           fprintf('done');
+        end
+        
+        
+        %% ------------------------------------------------------------------
+       
+       
+
+        
+        if strcmp(conf.experiment.RPQ.kernel,'linear')
+                fprintf('\n\t Loading instance_matrix S from %s  ....', conf.val.path_filename);
+                load (conf.val.path_filename);
+                fprintf('done');
+                S = instance_matrix;
+                
+                fprintf('\n\t Loading testing data from %s ....',conf.test.path_filename);
+                test = load (conf.test.path_filename);
+                fprintf('done');
+                test_instance_matrix = test.instance_matrix;
+                test_label_vector = test.label_vector;
+                clear  test.instance_matrix;
+        else
+                fprintf('\n\t Loading instance_matrix_kernel S from %s ....',conf.val.path_filename_kernel_valval);
+                load (conf.val.path_filename_kernel_valval);
+                fprintf('done');
+                S = K;
+                clear K;
+                
+                fprintf('\n\t Loading testing data from %s ....',conf.test.path_filename_kernel_testval);
+                load (conf.test.path_filename_kernel_testval);
+                fprintf('done');
+                test_instance_matrix = K_test';
+                clear  K_test;      
+                
+                 fprintf('\n\t Loading testing data from %s ....',conf.test.path_filename);
+                test = load (conf.test.path_filename,'label_vector');
+                fprintf('done');               
+                test_label_vector = test.label_vector;
+                
+                
+        end
+            
+         nrow = size(S,1);                
+         S(nrow+1,:)=1;    
+         
+         nrow = size(test_instance_matrix,1);                
+         test_instance_matrix(nrow+1,:)=1;    
+                
+        
+        fprintf('\n\t Loading R matrix from %s....',conf.experiment.RPQ.path_filename_RPQPkQk);
+        load(conf.experiment.RPQ.path_filename_R,'R');
+        fprintf(' done !');
+        
+       
+        %% ----------------------------------------------------------------             
+        fprintf('\n Testing ...');
+
+        arr_Acc=0;
+        arr_AP=0;
+        arr_Acc_V=0;
+        arr_AP_V=0;
+        arr_Step =conf.pseudoclas.arr_Step;        
+        num_Arr_Step = length(arr_Step);         
+        
+        ST_test = test_instance_matrix';
+        for i=1: num_Arr_Step 
+            l = arr_Step(i);        
+
+            fprintf('\n\t -----------------------------------------------');
+            fprintf('\n\t Computing i=%d/%d with kkk = %3d ...',i,num_Arr_Step, l);  
+
+            W=VVk(:,1:l);
+            Lambda=DDk(1:l,1:l);
+            
+            % Obtain U = ~ ST ~W .
+% 
+%             size(S)
+%             size(W)
+%             pause
+            U=S'*W;           
+            % Obtain V = ((U SS)+R )T .
+            SS=sqrt(Lambda);   
+            pinvUS=pinv(U*SS);              
+            VT=pinvUS*R;   
+            
+            % Algorithm: classification
+            % Calculate estimated response by Rtest = ~ STtest~WSS V T .
+            % Rtest = test.instance_matrix'*W*SS*VT; 
+            Rtest =ST_test*W*SS*VT; 
+            
+            if strcmp(conf.datasetName ,'ImageCLEF2012')
+                [ AP, pfirst, dPREC, dRECL, dF ] = imgCLEF.Evaluate(Rtest, test_ground_truth_matrix );
+                arr_Acc(i)=AP;
+                arr_AP(i)=AP;
+            else
+                [VL_AP, M_VL_AP, error_flat, Acc] =  Evaluate(Rtest, test_label_vector );
+                arr_Acc(i)=Acc;
+                arr_AP(i)=M_VL_AP;
+            end        
+                      
+             
+        end
+        fprintf('\n\t Saving results.....');        
+        save(conf.experiment.RPQ.path_filename_RPQPkQk_eigen_approach_results,'arr_Acc','arr_AP','-v7.3');
+        fprintf('done');
+        
+        fprintf('\n\t Results:\n');
+        arr_Acc
+       
+        arr_AP
+       
 end
 %   321: Joint optimization with High dimension feature vectors
 function conf = JointOptimizationWithHighDimensionApproach(conf)
@@ -592,8 +782,10 @@ function [conf]  = CaculatingKernel(conf)
         fprintf('\n\t Calculating kernel space is done !');
         return;
     end
+   
     
    kernel = conf.experiment.RPQ.kernel;
+   fprintf('\n Calculating kernel space: %s....',kernel);
     
    if ~exist(conf.val.path_filename_kernel, 'file')
         fprintf('\n\t Loading instance_matrix S from %s ....',conf.val.path_filename);
@@ -638,7 +830,8 @@ function [conf]  = CaculatingKernel(conf)
     if ~exist(conf.val.path_filename_kernel_valval,'file')
         fprintf('\n\t Calculating vl_alldist(train,train,%s).....',kernel);
         tic
-        K = vl_alldist(val.instance_matrix_kernel,val.instance_matrix_kernel, kernel) ;        % compute the Chi2 kernel
+       % K = vl_alldist(val.instance_matrix_kernel,val.instance_matrix_kernel, kernel) ;        % compute the Chi2 kernel
+        K = val.instance_matrix_kernel' * val.instance_matrix_kernel;
         toc
         fprintf('done');
         
@@ -654,7 +847,8 @@ function [conf]  = CaculatingKernel(conf)
         tic
         fprintf('\n\t Calculating vl_alldist(test,train,%s).....',kernel);
         tic
-        K_test = vl_alldist(test.instance_matrix_kernel,val.instance_matrix_kernel, kernel) ;        % compute the Chi2 kernel
+       % K_test = vl_alldist(test.instance_matrix_kernel,val.instance_matrix_kernel, kernel) ;        % compute the Chi2 kernel
+        K_test = test.instance_matrix_kernel' * val.instance_matrix_kernel;  
         toc
         fprintf('done');
         

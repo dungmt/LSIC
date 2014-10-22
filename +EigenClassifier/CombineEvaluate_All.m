@@ -77,7 +77,7 @@ function CombineEvaluate_All(conf)
     for i=1: num_Arr_Step %:-1:1
         k = arr_Step(i);        
         str_k = num2str(k,'%.3d');  
-        fprintf('\n\t LSIC: Composing i=%d/%d with k = %3d ...',i,num_Arr_Step, k);  
+        fprintf('\n\t LSIC: Composing i=%3d/%d with k = %3d ...',i,num_Arr_Step, k);  
 
         filename_final_score_matrix 		=  [conf.svr.prefix_file_ontest , str_k, conf.svr.suffix_file_ontest_final];
         path_filename_evaluation 	=  fullfile(pathToRegressionTrainsTest,filename_final_score_matrix);
@@ -89,7 +89,7 @@ function CombineEvaluate_All(conf)
         load(path_filename_evaluation); %,'scores_matrix','label_vector','num_pseudo_classes','VL_AUC','VL_AP','VL_AP_INTERP_11','M_VL_AP','-v7.3');z
  
         if strcmp( conf.datasetName,'Caltech256')
-            SVR_Arr_MAP_Test(i) =  M_VL_AP /num_Classes
+            SVR_Arr_MAP_Test(i) =  M_VL_AP /num_Classes;
         else 
             SVR_Arr_MAP_Test(i) = M_VL_AP;       
         end
@@ -98,7 +98,7 @@ function CombineEvaluate_All(conf)
         
         
         fprintf(' finish !');  
-        fprintf('\n-------------- !');         
+        fprintf('\n\t\t ------------------------------------ !');         
       %  pause;
     end
     
