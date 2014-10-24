@@ -36,15 +36,17 @@ function [ conf ] = SetupFeatures( conf )
         conf.BOW.voc_size =10000;      %So code word trong tu dien 
         conf.BOW.fileNameKeyPointsIndex  = ['index_kps_' conf.datasetName '.mat'];        
     elseif strcmp(conf.datasetName ,'Caltech256') 
-        conf.BOW.voc_size =4000;      %So code word trong tu dien
+        %conf.BOW.voc_size =4000;      %So code word trong tu dien
+        conf.BOW.voc_size =10000;      %Updated Oct -24
         conf.BOW.ratio_images_selected_to_train_codebook = 0.25; 
         conf.BOW.suffixFeatureTrainCodeBook = '_cb.mat';    
         conf.BOW.suffixKeyPoints = '.mat';  
         conf.BOW.fileNameKeyPointsTrainCodeBookIndex  = ['index_kps_cb_' conf.datasetName '.mat'];
         conf.BOW.fileNameKeyPointsIndex  = ['index_kps_' conf.datasetName '.mat'];
     elseif  strcmp(conf.datasetName ,'SUN397')
-        conf.BOW.voc_size =4000;      %So code word trong tu dien
-        conf.BOW.ratio_images_selected_to_train_codebook = 0.10; 
+       % conf.BOW.voc_size =4000;      %So code word trong tu dien
+        conf.BOW.voc_size =10000;      %Updated Oct -24
+        conf.BOW.ratio_images_selected_to_train_codebook = 0.25; 
         conf.BOW.suffixFeatureTrainCodeBook = '_cb.mat';    
         conf.BOW.suffixKeyPoints = '.mat';  
         conf.BOW.fileNameKeyPointsTrainCodeBookIndex  = ['index_kps_cb_' conf.datasetName '.mat'];

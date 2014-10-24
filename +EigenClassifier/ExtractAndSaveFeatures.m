@@ -384,7 +384,9 @@ end
             conf.BOW.pooler.kermap = 'none';             % 'homker', 'hellinger' (or other value = none [default])
             %conf.BOW.pooler.post_norm_type = 'none';    % 'l1' or 'l2' (or other value = none)
             %conf.BOW.pooler.quad_divs = 2;              % value = 2 [default])
-            %conf.BOW.pooler.horiz_divs = 3;             % value = 3 [default])
+            %conf.BOW.pooler.horiz_divs = 3;             % value = 3 [default])            
+            conf.BOW.pooler.quad_divs = 2;              % value = 2 [default])
+            conf.BOW.pooler.horiz_divs = 0;             % value = 3 [default])
         elseif strcmp(conf.BOW.typeEncoder,'VQEncoder')
             % VQEncoder
             conf.BOW.encoder = featpipem.encoding.VQEncoder(conf.BOW.codebook );

@@ -173,12 +173,21 @@ function SVR_Test(conf,solvertype, isPreComp,ci_start,ci_end)
                     otherwise
                          error('SVR_Test:otherwise: %s--> Chua cai dat', solvertype);
                 end
+                fprintf('\n\t\t  apply the calculations in reverse maxVec=%f-minVec=%f',maxVec,minVec);
+                vecN = decision_values;
+                %# to "de-normalize", apply the calculations in reverse
+                vecD = (vecN./2+0.5) * (maxVec-minVec) + minVec;
+%                 inv_ScoreMatrix(ci,:) = vecD ;
+                decision_values = vecD;
+                
                 save(path_filename_kq,'predicted_label', 'accuracy', 'decision_values','test_label_vector','-v7.3');   
                 
             end
 %             whos
 %             pause
-            inv_ScoreMatrix(ci,:) = decision_values';
+             inv_ScoreMatrix(ci,:) = decision_values';
+           
+
             
         end
          % Luu tru ket qua lai

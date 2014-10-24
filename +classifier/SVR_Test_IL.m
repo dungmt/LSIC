@@ -15,7 +15,7 @@ function SVR_Test_IL(conf,ci_start,ci_end)
     path_filename_score_matrix = conf.svr.path_filename_score_matrix;
     
     fprintf('\n+----------------------------------------------------+');
-    fprintf('\n| +classifier.SVR_Test                               |');
+    fprintf('\n| +classifier.SVR_Test_IL                               |');
     fprintf('\n+----------------------------------------------------+');
     fprintf('\n\t num_pseudo_classes: %d',num_pseudo_classes);    
     fprintf('\n\t pathToRegressionTrains:\n\t\t %s',pathToRegressionTrains);
@@ -23,8 +23,11 @@ function SVR_Test_IL(conf,ci_start,ci_end)
     fprintf('\n\t path_filename_score_matrix:\n\t\t %s',path_filename_score_matrix);
     fprintf('\n+----------------------------------------------------+');  
              
+        
+    
     fprintf('\n\t Predicting SVR...');
-    if exist(path_filename_score_matrix, 'file') && conf.isOverWriteSVRTest==false 
+    if exist(path_filename_score_matrix, 'file') && conf.isOverWriteSVRTest==false         
+        
          fprintf(' finish (ready) !');
          return;
     end
@@ -43,7 +46,11 @@ function SVR_Test_IL(conf,ci_start,ci_end)
         
         ci_endd = min(ci_end,num_pseudo_classes);
         % Load tat cac modedel 
-        
+   
+%     fprintf('\n Loading score matrix to file: %s ...', path_filename_score_matrix);
+%     load(path_filename_score_matrix); 
+%     fprintf('finish !');  
+   
         for ci=ci_start:ci_endd
             str_num_ci = num2str(ci,'%.3d');          
             filename_model{ci} = [prefix_file_model, str_num_ci, suffix_file_model];
@@ -56,8 +63,22 @@ function SVR_Test_IL(conf,ci_start,ci_end)
             fprintf('\n\t\t Loading model from file %s ...',path_filename_model_ci);
             load (path_filename_model_ci); %,'model','-v7.3');
             allmodel{ci} = model;
-        end
+            allmaxVec(ci) = maxVec;
+            allminVec(ci) = minVec;
+            
+%             fprintf('\n\t\t  apply the calculations in reverse maxVec=%f-minVec=%f',maxVec,minVec);
+            
+%              vecN = inv_ScoreMatrix(ci,:);
+%              %# to "de-normalize", apply the calculations in reverse
+%              vecD = (vecN./2+0.5) * (maxVec-minVec) + minVec;
+%              inv_ScoreMatrix(ci,:) = vecD ;                
+          end
         
+%     fprintf('\n Loading score matrix to file: %s ...', path_filename_score_matrix);
+%     save(path_filename_score_matrix, 'inv_ScoreMatrix', 'label_vector','-v7.3');
+%     fprintf('finish !');  
+%     return ;
+%    
         %% --------------------------------------------------------------
         
         start =1;                       
@@ -80,6 +101,16 @@ function SVR_Test_IL(conf,ci_start,ci_end)
            
              
             instance_matrix = sparse(double(setOfFeatures'));
+    
+            
+            
+            
+            
+            
+            
+            
+            
+            
             test_label_vector = label_vector((j-1)*mySize+1: j*mySize,1);
 
             for ci=ci_start:ci_endd
@@ -106,10 +137,21 @@ function SVR_Test_IL(conf,ci_start,ci_end)
                     fprintf('\n\t Testing pseudo class: %d  and test file: test.%s ..\n',ci,str_id);                                
                    % [predicted_label, accuracy, decision_values]= predict(test_label_vector, instance_matrix, model);    
                     [predicted_label, accuracy, decision_values]= predict(test_label_vector, instance_matrix, allmodel{ci});    
+                    
+                    
+                    maxVec = allmaxVec(ci);
+                    minVec = allminVec(ci);
+                    fprintf('\n\t\t  apply the calculations in reverse maxVec=%f-minVec=%f',maxVec,minVec);
+                    vecN = decision_values;
+                    %# to "de-normalize", apply the calculations in reverse
+                    vecD = (vecN./2+0.5) * (maxVec-minVec) + minVec;
+                    
+                    decision_values = vecD;     
+             
                     save(path_filename_kq,'predicted_label', 'accuracy', 'decision_values','-v7.3');
 %                     toc
                 else
-                     fprintf('\n\t Loading result of prediction class %d ...', ci)
+                    fprintf('\n\t Loading result of prediction class %d ...', ci)
                     load(path_filename_kq);
                 
                  end

@@ -16,6 +16,7 @@ function conf = MakeDirectories(conf )
     if strcmp(conf.feature.typeFeature,'phow') 
         % thu muc: features\phow_voc_size
         pathToFeaturesDir_tmp = [conf.feature.typeFeature '_' conf.BOW.typeEncoder '_' conf.BOW.typePooler sprintf('_%d',conf.BOW.voc_size)];
+        conf.str.strFeature = pathToFeaturesDir_tmp;
         conf.path.pathToFeaturesDir = fullfile(conf.path.pathToFeaturesDir,pathToFeaturesDir_tmp);
 
         utility.MakeDirectory(conf.path.pathToFeaturesDir); 
@@ -41,10 +42,15 @@ function conf = MakeDirectories(conf )
     % Data base
     % pathToIMDBDir
     conf.path.pathToIMDBDir = fullfile(conf.dir.rootDir,conf.dir.imdbDir);
+    conf.path.pathToIMDBDir = fullfile(conf.path.pathToIMDBDir,conf.str.strFeature);
+    
+    
     utility.MakeDirectory(conf.path.pathToIMDBDir);
     
      % --------------------------------------------------------------------
     % Experiment
+    conf.dir.experimentDir=fullfile(conf.dir.experimentDir,conf.str.strFeature);
+    
     utility.MakeDirectory(conf.dir.experimentDir);    
     fprintf('\n Directories are created successfull !\n');
     %fprintf(' finish !');

@@ -127,7 +127,18 @@ function SVR_Train(conf,solvertype, path_filename_instance_matrix,libsvm_options
     for ci=ci_start:ci_endd
   %  for ci=1:num_pseudo_classes     
         
-        training_label_vector = V(:,ci)*scaleValue;   
+       % training_label_vector = V(:,ci)*scaleValue;   
+        
+       %Oct 22
+        %# get max and min
+        vec = V(:,ci);   
+        maxVec = max(vec);
+        minVec = min(vec);
+
+        %# normalize to -1...1
+        training_label_vector = ((vec-minVec)./(maxVec-minVec) - 0.5 ) *2;
+
+     
      %   training_label_vector = V(:,ci)*1000;
        %%xx training_label_vector = VGT(:,ci)*scaleValue;   
         %%training_label_vector = VV(:,ci)*scaleValue;  
@@ -154,7 +165,7 @@ function SVR_Train(conf,solvertype, path_filename_instance_matrix,libsvm_options
 
             %fprintf('\n\t\t Writing model to file: %s...', filename_model_ci);    
             fprintf('\n\t\t Writing model to file %s ...',filename_model_ci); 
-            SaveModel(path_filename_model_ci,model);
+            SaveModel(path_filename_model_ci,model, minVec, maxVec);
             fprintf('finish !');     
             fprintf('\n\t\t ');
             toc
@@ -180,8 +191,8 @@ function SVR_Train(conf,solvertype, path_filename_instance_matrix,libsvm_options
      end
     
 end
-function SaveModel(path_filename_model_ci, model)
-        save(path_filename_model_ci,'model','-v7.3');
+function SaveModel(path_filename_model_ci, model, minVec, maxVec)
+        save(path_filename_model_ci,'model','minVec', 'maxVec','-v7.3');
     end
     
    

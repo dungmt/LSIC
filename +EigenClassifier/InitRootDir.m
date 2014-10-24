@@ -16,7 +16,7 @@ function [ conf ] = InitRootDir( conf )
             conf.dir.imagesDir       = 'train';
             conf.path.pathToModel   = '/net/per610a/export/das11f/plsang/dungmt';
             conf.path.pathToModelClassifer   = '/net/per610a/export/das11f/plsang/dungmt';
-             conf.dir.experimentDir = fullfile(rootDir, 'experiments');
+            conf.dir.experimentDir = fullfile(rootDir, 'experiments');
         elseif strcmp(conf.datasetName ,'Caltech256')
             rootDir = '/data/Dataset/256_ObjectCategories';
             conf.dir.rootDir        = rootDir;
